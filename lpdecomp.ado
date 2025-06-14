@@ -1,7 +1,7 @@
 *! version 1.0.0  
 program lpdecomp, eclass 
     version 15.0
-    syntax anything(equalok) [if] [in], [H(integer 20) H1(integer 0) Lag(integer 0) NWLag(integer 0) vmat(string) contemp(varlist) irfscale(integer 1) adjstd(real 1) ztail(real .05) CUM NOADJ]
+    syntax anything(equalok) [if] [in], [H(integer 20) H1(integer 0) Lag(integer 0) NWLag(integer 0) vmat(string) contemp(varlist) irfscale(integer 1) adjstd(real 1) ztail(real .05) CUM NOADJ NOX]
 
     // Check if data is time series
     capture tsset
@@ -100,7 +100,13 @@ program lpdecomp, eclass
     local vmat = "`vmat'"
     
     if (`Lag' > 0) {
-    	foreach var of local varlist {
+		if ("`nox'" != "") {
+			local lagvlist `w' `y'
+		}
+		else {
+			local lagvlist `varlist'
+		}
+    	foreach var of local lagvlist {
 		forv i = 1/`Lag' {
 		quietly gen `var'_`i' = L`i'.`var'
 		local w `w' `var'_`i'	
@@ -113,7 +119,7 @@ program lpdecomp, eclass
 	quietly corr `w'
 matrix C = r(C)
 mata: C = st_matrix("C"); st_numscalar("max_corr", max(abs(C - diag(diagonal(C)))))
-if max_corr > 0.999 {
+if max_corr > .999 {
      di as error "Should not invert this design matrix (collinearity). Make sure you didn't include redundant variables."
         exit 198
 }
@@ -434,7 +440,6 @@ void function cvtwirl( real scalar T,
 		meat = V
 	}
 	
-	
         V = bread * meat * bread
 	
 	
@@ -454,8 +459,6 @@ void function cvtwirl( real scalar T,
 	}
 	
 
-       
-
         conf = J(rows(se), 2, .)
         conf[,1] = mu :+ se * invnormal(ztail)
         conf[,2] = mu :+ se * invnormal(1-ztail)
@@ -469,12 +472,10 @@ void function cvtwirl( real scalar T,
         st_matrix("irc", irc)
 	st_matrix("se", se)
 	wvec = Xoz * bread * X'
-	wvec[1,20]
 	conv = delta * wvec' :* Y
-	lm = rows(yy)
-	rows(msc)-H+1-h1
-	for (j = 1; j <= rows(msc); j++) {
-    sp = lm - msc[j,]
+	rows(msc)-XS
+	for (j = 1; j <= XS; j++) {
+    sp = T - msc[j,]
 	sel = grab :== j
     mike = select(conv, sel)
 	yy[1::sp, j] = runningsum(mike, 0) 
