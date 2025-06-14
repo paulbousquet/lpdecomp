@@ -11,6 +11,8 @@ The code will create the weights needed to plot the evolution of the weighted av
 
 Using data from [Ramey (2016)](https://econweb.ucsd.edu/~vramey/research/Shocks_HOM_Ramey_published_corrected.pdf)
 
+I also use a custom program (`standshock.ado` in this repo) to standardize the monetary policy shock so the IRFs don't need to be rescaled.
+
 ```
 drop _all
 clear all
