@@ -47,7 +47,7 @@ drop if mdate > m(2020m1)
 // Run decomposition with following options: 
 // Horizon of 2 years
 // A years worth of lags
-// Don't include lagged zlb for collinearity
+// Don't include lagged zlb (collinearity)
 // Cumulative IRF
 // Don't scale IRF 
 lpdecomp dlcpi ff1_std `mount', h(24) lag(11) contemp(zlb) cum noadj
