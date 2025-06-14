@@ -113,7 +113,7 @@ program lpdecomp, eclass
 	quietly corr `w'
 matrix C = r(C)
 mata: C = st_matrix("C"); st_numscalar("max_corr", max(abs(C - diag(diagonal(C)))))
-if max_corr > 0.99 {
+if max_corr > 0.999 {
      di as error "Should not invert this design matrix (collinearity). Make sure you didn't include redundant variables."
         exit 198
 }
