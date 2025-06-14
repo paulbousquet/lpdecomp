@@ -40,7 +40,7 @@ gen dunemp = D.unemp
 
 local mount dunemp dlip debp
 
-drop if mdate < m(1988m11) | mdate > m(2020m1)
+drop if mdate > m(2020m1)
 
 // Run decomposition with following options: 
 // Horizon of 2 years
