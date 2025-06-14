@@ -473,7 +473,6 @@ void function cvtwirl( real scalar T,
 	st_matrix("se", se)
 	wvec = Xoz * bread * X'
 	conv = delta * wvec' :* Y
-	rows(msc)-XS
 	for (j = 1; j <= XS; j++) {
     sp = T - msc[j,]
 	sel = grab :== j
