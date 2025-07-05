@@ -116,7 +116,7 @@ program lpdecomp, eclass
 	
 	local w `w' `contemp'
 	
-	quietly corr `w'
+	quietly corr `x' `w'
 matrix C = r(C)
 mata: C = st_matrix("C"); st_numscalar("max_corr", max(abs(C - diag(diagonal(C)))))
 if max_corr > .999 {
@@ -222,6 +222,7 @@ if max_corr > .999 {
     }
     else {
         if ("`w'" == "") {
+		qui sum `x'
 		scalar delt = r(sd)
 	}
     }
@@ -396,7 +397,7 @@ void function cvtwirl( real scalar T,
 	linked = (H + 1)*EV
         results = J(linked, 1, 0)
         theta = J(cols(X), 1, 0)
-        lambda_opt = 0
+        lambda_opt = 10^(-10)
 	
 	XX = quadcross(X, X)
 	XY = quadcross(X, Y)
