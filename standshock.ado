@@ -1,5 +1,5 @@
 program define standshock
-    syntax varname, [NOISe(real 0.01)]
+    syntax varname, [NOISe(real 0.001) full_scale]
     
     * Store input variable name and create output name
     local input_var `varlist'
@@ -37,16 +37,22 @@ program define standshock
     qui replace `standardized_temp' = `standardized_nonzero' if `input_var' != 0
     
     * Step 5: Rescale the entire series to have std = 1
-    quietly sum `standardized_temp'
+	quietly sum `standardized_temp'
     local final_sd = r(sd)
     
     if `final_sd' == 0 {
         display as error "Final standard deviation is zero"
         exit 198
     }
+	tempvar scaled
+	
+	if "`full_scale'" == "" {
+		qui gen `scaled' = `standardized_temp'
+	}
+	else {
+		qui gen `scaled' = `standardized_temp' / `final_sd'
+	}
     
-    tempvar scaled
-    qui gen `scaled' = `standardized_temp' / `final_sd'
     
     * Step 6: Add noise to non-zero values (if noise parameter > 0)
     if `noise' > 0 {
