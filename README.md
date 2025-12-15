@@ -17,7 +17,9 @@ I also use a custom program (`standshock.ado` in this repo) to standardize the m
 drop _all
 clear all
 
-import excel Monetarydat.xlsx, sheet("Monthly") firstrow case(l)
+import excel using ///
+"https://raw.githubusercontent.com/paulbousquet/lpdecomp/main/Monetarydat.xlsx", ///
+sheet("Monthly") firstrow case(lower)
 
 gen mdate = m(1959m1) + _n-1
 tsset mdate, m
@@ -50,51 +52,45 @@ drop if mdate > m(2020m1)
 // Don't include lagged zlb (collinearity)
 // Cumulative IRF
 // Don't scale IRF 
-lpdecomp dlcpi ff1_std `mount', h(24) lag(11) contemp(zlb) cum noadj
+lpdecomp dlcpi ff1_std `mount', h(24) lag(11) contemp(zlb) cum noadj decompgraph
 ```
-This code creates a matrix stored as `makes`, which you can turn into a variable using `svmat double makes, names(makes)`. For more information on the options associated with this function, see my [smooth local projections repo](https://github.com/paulbousquet/SmoothLP). 
+By default, this will show the decomposition for the impact horizon. You can choose a different horizon by adding the option `makescol(k)`. 
 
-Visualization is especially a work in progress. Here's some code to visualize the 0 horizon point estimate. 
+Note this code assumes your `tsset` in Stata is done with respect to an actual time variable. 
+
+For more customizability, this code creates a variable using `svmat double makes, names(makes)`. For more information on the options associated with this function, see my [smooth local projections repo](https://github.com/paulbousquet/SmoothLP). 
+
+Here are the relevant parts of the function to recreate graphs exactly which you can then customize further 
 ```
-svmat double makes, names(makes)
+qui sum makes`makescol' irc2
+	local y_min = r(min)
+	local y_max = r(max)
+	local y_range = `y_max' - `y_min'
+	local text_y = (`y_max' - result1[1])/2 
+	
+	// Build xlabel values: 4-year increments starting from even year
+	local first_year = year(dofm(`first_main'))
+	if mod(`first_year', 4) != 0 {
+		local first_year = `first_year' + (4 - mod(`first_year', 4))
+	}
+	local last_year = year(dofm(`last_main'))
+	local xlabs ""
+	forvalues yr = `first_year'(4)`last_year' {
+		local lab_date = tm(`yr'm1)
+		local xlabs "`xlabs' `lab_date'"
+	}
+	
+	// Text position slightly to the right of the line
+	local text_x = `irf_line' + 5
 
-// Find where makes1 ends
-summarize time if !missing(makes1)
-local max_t = r(max)
-
-// Create a shifted time variable for the IRF
-gen time_shifted = time + `max_t' + 1
-
-* Create rescaled date for the IRF section
-* Create date variable starting from November 1988
-gen date = tm(1988m11) + time - 1 if !missing(time)
-format date %tm
-
-* Create rescaled date for the IRF section
-gen date_rescaled = tm(1988m11) + time_shifted + (time_shifted - time_shifted[1]) * 9 - 1 if time <= 20
-format date_rescaled %tm
-
-* Find the last date in the main series to place the vertical line
-sum date if !missing(makes1)
-local last_main = r(max)
-local irf_line = `last_main' + 1
-
-* Get y-coordinate for text placement
-sum makes1 result1
-local text_y = abs(r(max)) * 3.4  // Place text at 90% of max height
-
-* Plot with extended dates and IRF indicator
-twoway (line makes1 date if !missing(makes1), lcolor(blue) lwidth(medthick)) ///
-       (rarea irc1 irc2 date_rescaled if time<=20, fcolor(purple%15) lcolor(gs13) lw(none) lpattern(solid)) ///
-       (scatter result1 date_rescaled if time<=20, c(l) clp(l) ms(i) clc(black) mc(black) clw(medthick)), ///
-       xline(`irf_line', lcolor(black) lwidth(medium)) ///
-       text(`text_y' `irf_line' "← IRF begins", place(e) size(small) color(black)) ///
-       xlabel(`=tm(1990m1)' `=tm(1995m1)' `=tm(2000m1)' `=tm(2005m1)' `=tm(2010m1)' `=tm(2015m1)' , format(%tmCY)) ///
-       xtitle("") ///
-	   legend(order(1 "Decomposition" 3 "IRF") position(6) ring(0) cols(1)) ///
-	   title("CPI Impulse Response + Decomposition of Period 0 Coefficient") ///
-	    yscale(range(-0.2 0.1)) ylabel(-0.2(0.05)0.1)
- 
+twoway (line makes`makescol' makes_date if !missing(makes`makescol'), lcolor(blue) lwidth(medthick)) ///
+				   (rarea irc1 irc2 date_rescaled if time<=`H', fcolor(purple%15) lcolor(gs13) lw(none)) ///
+				   (scatter result1 date_rescaled if time<=`H', c(l) clp(l) ms(i) clc(black) mc(black) clw(medthick)), ///
+				   xline(`irf_line', lcolor(black) lwidth(medium)) ///
+				   text(`text_y' `text_x' "← IRF Begins", place(e) size(small)) ///
+				   xlabel(`xlabs', format(%tmCY)) xtitle("") yscale(range(. `=`y_max' + `y_range'*0.08')) ///
+				   legend(order(1 "Decomposition" 3 "IRF") position(6) ring(0) cols(1)) ///
+				   title("Decomposition + IRF: `y' response to `x'")
 
 ```
 
