@@ -11,7 +11,7 @@ program lpdecomp, eclass
 		}
 	}
 	
-	local fresh result1 irc1 irc2 time makes1 makes_date date_rescaled
+	local fresh result1 irc1 irc2 time makes* makes_date date_rescaled tused*
 	foreach var of local fresh {
 		capture drop `var'
 	}
@@ -457,3 +457,4 @@ real scalar function idb(idx,blk){
 	return ((idx-1)*blk+1)
 }
 end 
+
