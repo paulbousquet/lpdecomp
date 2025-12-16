@@ -29,17 +29,14 @@ gen t = _n
 replace ff1 = 0 if abs(ff1) < .005
 standshock ff1 
 
+// dependent variable -- cumulative change in price level
+// (measured in percent change since impulse by cumulating)
+gen dlcpi = 100*D.lcpi
 
 // create controls 
 gen zlb = (tffr < .2)
-
-local set lcpi lip ebp 
-
-foreach var of local set {
-	gen d`var' = 100 * D.`var'
-	local mount `mount' d`var'
-}
-
+gen dlip = 100*D.lip
+gen debp = D.ebp
 gen dunemp = D.unemp
 
 local mount dunemp dlip debp
