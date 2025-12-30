@@ -51,6 +51,8 @@ drop if mdate > m(2020m1)
 // Don't scale IRF 
 lpdecomp dlcpi ff1_std `mount', h(24) lag(11) contemp(zlb) cum noadj decompgraph
 ```
+<img width="1047" height="742" alt="image" src="https://github.com/user-attachments/assets/06fa8792-ffb3-451c-8163-0025fd3524f3" />
+
 By default, this will show the decomposition for the impact horizon. You can choose a different horizon by adding the option `makescol(k)`. 
 
 Note this code assumes your `tsset` in Stata is done with respect to an actual time variable. 
