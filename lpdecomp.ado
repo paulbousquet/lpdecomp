@@ -79,7 +79,7 @@ program lpdecomp, eclass
 			quietly gen temp_`i' = .
 			forvalues j=1/`=`T'-`i'' {
 				quietly sum `y' in `j'/`=`j'+`i''
-				quietly replace temp_`i' = r(sum) in `j'
+				quietly replace temp_`i' = r(sum) / (r(N) == `i'+1) in `j'
 			}
 		}
 	}
@@ -457,4 +457,5 @@ real scalar function idb(idx,blk){
 	return ((idx-1)*blk+1)
 }
 end 
+
 
