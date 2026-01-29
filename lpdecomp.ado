@@ -71,7 +71,6 @@ program lpdecomp, eclass
 	local EV = 1 
 	
 	quietly drop if _n <= `Lag'
-	quietly drop if missing(`y')
 	local T = _N
 	
 	if ("`cum'" != "") {
@@ -457,5 +456,6 @@ real scalar function idb(idx,blk){
 	return ((idx-1)*blk+1)
 }
 end 
+
 
 
