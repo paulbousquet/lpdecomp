@@ -97,12 +97,16 @@ program lpdecomp, eclass
 		qui capture drop if `var'==0
 	}
 
-	tempvar h_range
-	quietly generate `h_range' = `h1' + _n - 1 if _n <= `H'+1-`h1'
-	quietly bspline, xvar(`h_range') power(1) knots(`=`h1''(1)`=`H'') gen(bs)
-	mkmat bs*, matrix(bs)
-	matrix basis = bs[1..`=`H'+1-`h1'',1'...]
-	drop bs*
+	if (`H' == `h1') {
+    	matrix basis = J(1, 1, 1)
+	}
+	else {
+    	quietly generate `h_range' = `h1' + _n - 1 if _n <= `H'+1-`h1'
+    	quietly bspline, xvar(`h_range') power(1) knots(`=`h1''(1)`=`H'') gen(bs)
+    	mkmat bs*, matrix(bs)
+    	matrix basis = bs[1..`=`H'+1-`h1'',1'...]
+    	drop bs*
+	}
 	
 	if ("`w'" != "") {
 		tempname wmat
@@ -388,4 +392,5 @@ real scalar function idb(idx, blk) {
 	return ((idx - 1) * blk + 1)
 }
 end
+
 
