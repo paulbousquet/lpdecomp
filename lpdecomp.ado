@@ -361,15 +361,16 @@ void function combined_lpdecomp(
 	wvec = delta * Xoz * bread * X'
 	plate = wvec'
 	bleak = plate :* Y
-	
-	conv = yy
-	wvec_out = yy
+
+	makes = J(rows(yy), cols(yy), .)
+	conv = makes
+	wvec_out = makes
 	for (j = 1; j <= XS; j++) {
 		sp = msc[j,]
 		jsel = grab :== j
 		mike = select(bleak, jsel)
 		jerry = select(plate, jsel)
-		yy[1::sp, j] = runningsum(mike, 0)
+		makes[1::sp, j] = runningsum(mike, 0)
 		conv[1::sp, j] = mike
 		wvec_out[1::sp, j] = jerry
 	}
@@ -387,3 +388,4 @@ real scalar function idb(idx, blk) {
 	return ((idx - 1) * blk + 1)
 }
 end
+
