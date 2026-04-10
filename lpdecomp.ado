@@ -101,6 +101,7 @@ program lpdecomp, eclass
     	matrix basis = J(1, 1, 1)
 	}
 	else {
+		tempvar h_range
     	quietly generate `h_range' = `h1' + _n - 1 if _n <= `H'+1-`h1'
     	quietly bspline, xvar(`h_range') power(1) knots(`=`h1''(1)`=`H'') gen(bs)
     	mkmat bs*, matrix(bs)
@@ -383,7 +384,7 @@ void function combined_lpdecomp(
 	st_matrix("results", results)
 	st_matrix("irc", irc)
 	st_matrix("se", se)
-	st_matrix("makes", yy)
+	st_matrix("makes", makes)
 	st_matrix("wvec", wvec_out)
 	st_matrix("conv", conv)
 }
